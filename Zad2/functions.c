@@ -21,19 +21,19 @@ void menu(Bank_Info* struct_arr)
 			if (total_accounts > 0)
 				output_bank_info(struct_arr, total_accounts);
 			else
-				puts("\nThere's no accounts.");
+				puts("\nThere are no accounts.");
 			break;
 		case 3:
 			if (total_accounts > 0)
 				count_clients_account(struct_arr, total_accounts);
 			else
-				puts("\nThere's no accounts.");
+				puts("\nThere are no accounts.");
 			break;
 		case 4:
 			if (total_accounts > 0)
 				delete_accounts(&struct_arr, &total_accounts);
 			else
-				puts("\nThere's no accounts.");
+				puts("\nThere are no accounts.");
 			break;
 		case 5:
 			free_struct_array(&struct_arr, &total_accounts);
@@ -56,12 +56,14 @@ void print_menu()
 
 void menu_option_choice(int* choice)
 {
-	while (scanf_s("%d", choice) != 1 || *choice < 1 || *choice > 5)
+	while (1)
 	{
-		puts("Invalid Input.");
-		rewind(stdin);
+		int_input(choice);
+		if (*choice < 1 || *choice > 5)
+			puts("\nChoose an option(1-5).");
+		else
+			break;
 	}
-	rewind(stdin);
 }
 
 void input_bank_info(Bank_Info** struct_arr, int* total_accounts)
@@ -100,17 +102,41 @@ void struct_rewrite_request(Bank_Info** struct_arr, int* total_numbers)
 void input_passport_number(Bank_Info* struct_arr, int array_position)
 {
 	puts("\nEnter a passport number:");
-	int_input(&(struct_arr[array_position].passport_number));
+	while (1)
+	{
+		int_input(&(struct_arr[array_position].passport_number));
+		if (struct_arr[array_position].passport_number < 0)
+			puts("\nPassport number cannot be less than 0.");
+		else
+			break;
+	}
 }
 
 void int_input(int* var)
 {
-	while (scanf_s("%d", var) != 1)
+	char buffer[100];
+	char* endptr;
+	long temp;
+
+	while (1)
 	{
-		printf("Invalid Input.\n");
-		rewind(stdin);
+		fgets(buffer, sizeof(buffer), stdin);
+
+		buffer[strcspn(buffer, "\n")] = '\0';
+
+		if (buffer[0] != '\0')
+		{
+			temp = strtol(buffer, &endptr, 10);
+
+			if (*endptr == '\0')
+			{
+				*var = (int)temp;
+				return;
+			}
+		}
+
+		puts("\nInvalid Input. Please, enter a single integer.");
 	}
-	rewind(stdin);
 }
 
 void input_surname(Bank_Info* struct_arr, int array_position)
@@ -124,6 +150,11 @@ void str_input(char** str)
 {
 	int length = 0;
 	char c;
+
+	while ((c = getchar()) == '\n')
+		puts("\nYou cannot enter an empty string.");
+
+	ungetc(c, stdin);
 	while ((c = getchar()) != '\n')
 	{
 		length++;
@@ -131,40 +162,69 @@ void str_input(char** str)
 		check_char_alloc(*str);
 		(*str)[length - 1] = c;
 	}
-
+	
 	(*str)[length] = '\0';
 }
 
 void input_account_number(Bank_Info* struct_arr, int array_position)
 {
 	char* temp = (struct_arr[array_position].Account_info.account_number);
-	while (1)
+	
+	int is_running = 1;
+	while (is_running)
 	{
 		printf("\nEnter a %d-digit account number:\n", ACC_NUM_LEN);
 		fgets(temp, ACC_NUM_LEN + 2, stdin);
 		temp[strcspn(temp, "\n")] = '\0';
-
+		rewind(stdin);
+		
 		if (strlen(temp) == ACC_NUM_LEN)
-			break;
-
-		printf("Invalid Input.\n");
+		{
+			check_unique_acc_num(struct_arr, array_position, &is_running, temp);
+			continue;
+		}
+		
+		puts("\nInvalid Input.");
 	}
+}
+
+void check_unique_acc_num(Bank_Info* struct_arr, int total_accounts, int* flag, char* new_num)
+{
+	for (int i = 0; i < total_accounts; i++)
+	{
+		if (strcmp(new_num, struct_arr[i].Account_info.account_number) == 0)
+		{
+			puts("\nThis account number already exist.");
+			return;
+		}
+	}
+
+	*flag = 0;
 }
 
 void input_deposit_value(Bank_Info* struct_arr, int array_position)
 {
 	puts("\nEnter a deposit value:");
-	int_input(&(struct_arr[array_position].Account_info.deposit_value));
+	while (1)
+	{
+		int_input(&(struct_arr[array_position].Account_info.deposit_value));
+		if (struct_arr[array_position].Account_info.deposit_value < 0)
+			puts("\nDeposit value cannot be less than 0.");
+		else
+			break;
+	}
 }
 
 void choice_loop(int* choice_var)
 {
-	while (scanf_s("%d", choice_var) != 1 || (*choice_var != 0 && *choice_var != 1))
+	while (1)
 	{
-		puts("Invalid Input.");
-		rewind(stdin);
+		int_input(choice_var);
+		if (*choice_var != 1 && *choice_var != 0)
+			puts("\nInvalid Input. Please, choose an option(1 or 0).");
+		else
+			break;
 	}
-	rewind(stdin);
 }
 
 void output_bank_info(Bank_Info* struct_arr, int total_accounts)
@@ -183,7 +243,14 @@ void count_clients_account(Bank_Info* struct_arr, int total_accounts)
 {
 	int target_passport_number;
 	puts("\nEnter a passport number to count client's accounts:");
-	int_input(&target_passport_number);
+	while (1)
+	{
+		int_input(&target_passport_number);
+		if (target_passport_number < 0)
+			puts("\nPassport number cannot be less than 0.");
+		else
+			break;
+	}
 
 	int total = 0;
 	for (int i = 0; i < total_accounts; i++)
@@ -193,7 +260,7 @@ void count_clients_account(Bank_Info* struct_arr, int total_accounts)
 	if (total)
 		printf("\nNumber of accounts with this passport number: %d\n", total);
 	else
-		puts("\nThere is no account with this passport number.");
+		puts("\nThere are no accounts with this passport number.");
 }
 
 void delete_accounts(Bank_Info** struct_arr, int* total_accounts)
@@ -201,6 +268,7 @@ void delete_accounts(Bank_Info** struct_arr, int* total_accounts)
 	char* target_surname = NULL;
 	puts("\nEnter accounts' surname to delete:");
 	str_input(&target_surname);
+	check_char_alloc(target_surname);
 
 	int is_found = 0, total = 0;
 

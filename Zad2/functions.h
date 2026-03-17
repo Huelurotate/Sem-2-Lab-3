@@ -28,6 +28,7 @@ void input_surname(Bank_Info* struct_arr, int array_position);
 void str_input(char** str);
 
 void input_account_number(Bank_Info* struct_arr, int array_position);
+void check_unique_acc_num(Bank_Info* struct_arr, int total_accounts, int* flag, char* new_num);
 
 void input_deposit_value(Bank_Info* struct_arr, int array_position);
 

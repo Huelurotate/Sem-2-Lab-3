@@ -46,12 +46,14 @@ void print_menu()
 
 void menu_option_choice(int* choice)
 {
-	while (scanf_s("%d", choice) != 1 || *choice < 1 || *choice > 4)
+	while (1)
 	{
-		puts("Invalid Input.");
-		rewind(stdin);
+		int_input(choice);
+		if (*choice < 1 || *choice > 4)
+			puts("\nChoose an option(1-4).");
+		else
+			break;
 	}
-	rewind(stdin);
 }
 
 void input_number(short* number, int* flag)
@@ -59,12 +61,14 @@ void input_number(short* number, int* flag)
 	printf("\nEnter a number between %d and %d:\n", MIN_INPUT, MAX_INPUT);
 
 	int temp;
-	while (scanf_s("%d", &temp) != 1 || temp > MAX_INPUT || temp < MIN_INPUT)
+	while (1)
 	{
-		printf("Invalid Input.\n");
-		rewind(stdin);
+		int_input(&temp);
+		if (temp > MAX_INPUT || temp < MIN_INPUT)
+			printf("\nPlease, enter a number between %d and %d.\n", MIN_INPUT, MAX_INPUT);
+		else
+			break;
 	}
-	rewind(stdin);
 
 	*number = temp;
 	*flag = 1;
@@ -112,6 +116,28 @@ void shift_bits(Number* union_ptr)
 	union_ptr->bits.b13 = union_ptr->bits.b14;
 	union_ptr->bits.b14 = union_ptr->bits.b15;
 	union_ptr->bits.b15 = sign_digit;
+}
+
+void int_input(int* var)
+{
+	while (1)
+	{
+		if (scanf_s("%d", var) == 1)
+		{
+			char c = getchar();
+			if (c != '\n')
+			{
+				printf("Invalid Input.\n");
+				rewind(stdin);
+			}
+			else return;
+		}
+		else
+		{
+			printf("Invalid Input.\n");
+			rewind(stdin);
+		}
+	}
 }
 
 void short_alloc_check(short* memory_block)

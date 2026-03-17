@@ -36,4 +36,5 @@ void output_number(short number);
 void find_smaller_number(short number);
 void shift_bits(Number* union_ptr);
 
+void int_input(int* var);
 void short_alloc_check(short* memory_block);
